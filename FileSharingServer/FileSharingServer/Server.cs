@@ -7,7 +7,10 @@ namespace FileSharingServer
 {
 	public class Server
 	{
+		private const string SaveFileName = "e:\\server\\avatar.jpg";
 		private const int PortNumber = 9999;
+		private const int BufferSize = 1024;
+		public string Status = string.Empty;
 
 		public static void Main(string[] args)
 		{
@@ -17,20 +20,60 @@ namespace FileSharingServer
 			Console.WriteLine("Server started on " + listener.LocalEndpoint);
 			Console.WriteLine("Waiting for a connection...");
 
-			var socket = listener.AcceptSocket();
-			Console.WriteLine("Connection received from " + socket.RemoteEndPoint);
+			while (true)
+			{
+				SaveFile(listener.AcceptSocket());
+			}
+		}
 
-			var stream = new NetworkStream(socket);
-			var reader = new StreamReader(stream);
-			var writer = new StreamWriter(stream) { AutoFlush = true };
+		private static void SaveFile(Socket socket)
+		{
+			Console.WriteLine("=============================================");
+			try
+			{
+				Console.WriteLine($"{socket.RemoteEndPoint} has connected");
+				using (var stream = new NetworkStream(socket))
+				using (var reader = new StreamReader(stream))
+				using (var writer = new StreamWriter(stream) {AutoFlush = true})
+				{
+					try
+					{
+						byte[] recData = new byte[BufferSize];
+						int recBytes;
+						var fileStream = new FileStream(SaveFileName, FileMode.OpenOrCreate, FileAccess.Write);
+						while ((recBytes = reader.BaseStream.Read(recData, 0, recData.Length)) > 0)
+						{
+							Console.WriteLine(recBytes);
+							if (recBytes < BufferSize)
+							{
+								
+							}
+							fileStream.Write(recData, 0, recBytes);
+						}
+						fileStream.Close();
+						Console.WriteLine("saved");
 
-			var str = reader.ReadToEnd();
+						writer.WriteLine("done");
+						Console.WriteLine("done");
+					}
+					catch (Exception e)
+					{
+						writer.WriteLine("Error" + e.StackTrace);
+						Console.WriteLine(e);
+					}
+				}
 
-			writer.WriteLine("Hello " + str);
-
-			stream.Close();
-			socket.Close();
-			Console.Read();
+				
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
+			}
+			finally
+			{
+				socket.Close();
+				Console.WriteLine("=============================================");
+			}
 		}
 	}
 }

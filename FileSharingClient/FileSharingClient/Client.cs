@@ -10,46 +10,20 @@ namespace FileSharingClient
 
 		public static void Main(string[] args)
 		{
+			Console.ReadKey();
+			using (var client = new TcpClient("127.0.0.1", PortNumber))
+			using (var stream = client.GetStream())
+			using (var reader = new StreamReader(stream))
+			using (var writer = new StreamWriter(stream) { AutoFlush = true })
 			{
-				try
-				{
-					TcpClient client = new TcpClient();
+				var content = File.ReadAllBytes("e:\\ava.jpg");
+				stream.Write(content, 0, content.Length);
 
-					// 1. connect
-					client.Connect("127.0.0.1", PortNumber);
-					Stream stream = client.GetStream();
+				var result = reader.ReadLine();
 
-					Console.WriteLine("Connected to Y2Server.");
-					while (true)
-					{
-						Console.Write("Enter your name: ");
-
-						string str = Console.ReadLine();
-						var reader = new StreamReader(stream);
-						var writer = new StreamWriter(stream) {AutoFlush = true};
-
-						// 2. send
-						writer.WriteLine(str);
-
-						// 3. receive
-						str = reader.ReadLine();
-						Console.WriteLine(str);
-						if (str?.ToUpper() == "BYE")
-							break;
-					}
-					// 4. close
-					stream.Close();
-					client.Close();
-				}
-
-				catch (Exception ex)
-				{
-					Console.WriteLine("Error: " + ex);
-				}
-
-				Console.Read();
+				Console.WriteLine(result);
 			}
-			
+			Console.ReadKey();
 		}
 	}
 }
