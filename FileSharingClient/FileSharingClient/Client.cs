@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
-using System.Text;
 
 namespace FileSharingClient
 {
@@ -21,6 +20,10 @@ namespace FileSharingClient
 				client = new TcpClient("127.0.0.1", PortNumber);
 				Console.WriteLine("Connected to the Server...\n");
 				networkStream = client.GetStream();
+
+				var writer = new StreamWriter(networkStream) { AutoFlush = true };
+				writer.WriteLine("avatar.jpg");
+
 				var fs = new FileStream(SendingFilePath, FileMode.Open, FileAccess.Read);
 				var noOfPackets = Convert.ToInt32(Math.Ceiling(Convert.ToDouble(fs.Length) / Convert.ToDouble(BufferSize)));
 				var totalLength = (int)fs.Length;
@@ -36,11 +39,17 @@ namespace FileSharingClient
 						currentPacketLength = totalLength;
 					var sendingBuffer = new byte[currentPacketLength];
 					fs.Read(sendingBuffer, 0, currentPacketLength);
-					networkStream.Write(sendingBuffer, 0, sendingBuffer.Length);
+					writer.BaseStream.Write(sendingBuffer, 0, sendingBuffer.Length);
 				}
 
 				Console.WriteLine("Sent " + fs.Length + " bytes to the server");
 				fs.Close();
+
+				var reader = new StreamReader(networkStream);
+				while (true)
+				{
+					Console.WriteLine(reader.ReadLine());
+				}
 			}
 			catch (Exception ex)
 			{
@@ -52,14 +61,6 @@ namespace FileSharingClient
 				client?.Close();
 
 			}
-		}
-		void TransmitFileName(Stream stream, string fileName)
-		{
-			byte[] fileNameBytes = Encoding.UTF8.GetBytes(fileName),
-				fileNameLengthBytes = BitConverter.GetBytes(fileNameBytes.Length);
-
-			stream.Write(fileNameLengthBytes, 0, 4);
-			stream.Write(fileNameBytes, 0, fileNameBytes.Length);
 		}
 	}
 }
