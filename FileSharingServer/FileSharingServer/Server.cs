@@ -7,10 +7,9 @@ namespace FileSharingServer
 {
 	public class Server
 	{
-		private const string SaveFileName = "e:\\server";
+		private const string BaseUrl = "d:\\server";
 		private const int PortNumber = 8080;
 		private const int BufferSize = 1024;
-		public string Status = string.Empty;
 
 		public static void Main(string[] args)
 		{
@@ -29,45 +28,63 @@ namespace FileSharingServer
 		private static void SaveFile(Socket socket)
 		{
 			Console.WriteLine("=============================================");
+			Console.WriteLine($"{socket.RemoteEndPoint} has connected");
+
+			NetworkStream stream = null;
+			StreamReader reader = null;
+			StreamWriter writer = null;
+
 			try
 			{
-				Console.WriteLine($"{socket.RemoteEndPoint} has connected");
-				using (var stream = new NetworkStream(socket))
-				{
-					try
-					{
-						var reader = new StreamReader(stream);
-						var fileName = reader.ReadLine();
-						Console.WriteLine(fileName);
-						byte[] recData = new byte[BufferSize];
-						int recBytes;
-						var fileStream = new FileStream(Path.Combine(SaveFileName, fileName), FileMode.OpenOrCreate, FileAccess.Write);
-						while ((recBytes = stream.Read(recData, 0, recData.Length)) > 0)
-						{
-							fileStream.Write(recData, 0, recBytes);
-						}
-						fileStream.Close();
-						Console.WriteLine("done");
+				stream = new NetworkStream(socket);
+				reader = new StreamReader(stream);
+				writer = new StreamWriter(stream);
 
-						var writer = new StreamWriter(stream);
+				var fileName = reader.ReadLine();
+				var totalLength = Convert.ToInt64(reader.ReadLine());
+				Console.WriteLine(fileName + " " + totalLength);
+				byte[] recData = new byte[BufferSize];
+				var fileStream = new FileStream(Path.Combine(BaseUrl, fileName), FileMode.OpenOrCreate, FileAccess.Write);
+				try
+				{
+					var recBytes = BufferSize;
+					while (totalLength > 0)
+					{
+						recBytes = BufferSize < totalLength ? BufferSize : (int)totalLength;
+						Console.Write(recBytes + " ");
+						recBytes = stream.Read(recData, 0, recBytes);
+						Console.WriteLine(recBytes);
+						fileStream.Write(recData, 0, recBytes);
+						totalLength -= recBytes;
+					}
+					Console.WriteLine(totalLength + " " + recBytes);
+
+					Console.WriteLine(reader.ReadLine());
+					Console.WriteLine("server done");
+
+					while (true)
+					{
 						writer.WriteLine("done");
 					}
-					catch (Exception e)
-					{
-						Console.WriteLine(e);
-					}
-				}
 
-				
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine(e);
+				}
+				finally
+				{
+					fileStream.Close();
+					
+					Console.WriteLine("=============================================");
+				}
 			}
 			finally
 			{
+				reader?.Close();
+				writer?.Close();
+				stream?.Close();
 				socket.Close();
-				Console.WriteLine("=============================================");
 			}
 		}
 	}
