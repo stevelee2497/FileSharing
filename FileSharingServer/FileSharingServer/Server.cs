@@ -9,7 +9,7 @@ namespace FileSharingServer
 {
 	public class Server
 	{
-		private const string BaseUrl = "d:\\server";
+		private const string BaseUrl = "e:\\server";
 		private const int PortNumber = 8080;
 		private const int BufferSize = 1024;
 
@@ -51,10 +51,10 @@ namespace FileSharingServer
 					case "GET_FILES":
 						SendFileNames(writer);
 						break;
+					case "GET_IMAGE":
+						SendFile(writer, reader);
+						break;
 				}
-
-				
-
 			}
 			catch (Exception e)
 			{
@@ -67,18 +67,23 @@ namespace FileSharingServer
 			}
 		}
 
+		private static void SendFile(StreamWriter writer, StreamReader reader)
+		{
+			var fileName = reader.ReadLine();
+
+			var data = File.ReadAllBytes(Path.Combine(BaseUrl, fileName));
+			writer.WriteLine(data.Length);
+			writer.BaseStream.Write(data, 0, data.Length);
+			writer.Close();
+		}
+
 		private static void SendFileNames(StreamWriter writer)
 		{
-			while (true)
+			var fileNames = new[]
 			{
-				var fileNames = new[]
-				{
-					"avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg",
-				};
-				Console.WriteLine(fileNames);
-				writer.WriteLine();
-				Console.ReadKey();
-			}
+				"avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg",
+			};
+			writer.WriteLine(string.Join(',', fileNames));
 		}
 
 		private static void SaveFile(StreamReader reader)

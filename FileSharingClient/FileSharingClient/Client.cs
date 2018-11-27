@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net.Mime;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace FileSharingClient
 		public static string SendingFilePath = "C:\\Users\\Tranq\\Desktop\\IMG_3863.JPG";
 
 		private const int BufferSize = 1024;
+		private const string BaseUrl = "e:\\client";
 
 		public static void Main(string[] args)
 		{
@@ -19,11 +21,62 @@ namespace FileSharingClient
 
 			//PostFile(ip, portNumber, method);
 
-			GetFileNames(ip, portNumber, "GET_FILES");
+			//GetFileNames(ip, portNumber, "GET_FILES");
+
+			GetImage(ip, portNumber, "GET_IMAGE");
 
 			Console.WriteLine("press any key to exit ...");
 			Console.ReadKey();
 		}
+
+		private static void GetImage(string ip, int portNumber, string method)
+		{
+			TcpClient client = null;
+			NetworkStream networkStream = null;
+			StreamReader reader = null;
+			StreamWriter writer = null;
+			try
+			{
+				client = new TcpClient(ip, portNumber);
+				Console.WriteLine("Connected to the Server...\n");
+				networkStream = client.GetStream();
+				writer = new StreamWriter(networkStream) { AutoFlush = true };
+				reader = new StreamReader(networkStream);
+
+				var fileName = "avatar.jpg";
+
+				writer.WriteLine(method);
+				writer.WriteLine(fileName);
+
+				var fileSize = Convert.ToInt64(reader.ReadLine());
+
+				Console.WriteLine(fileSize);
+
+				var recData = new byte[BufferSize];
+				var fileStream = new FileStream(Path.Combine(BaseUrl, fileName), FileMode.OpenOrCreate, FileAccess.Write);
+				int recBytes;
+				while ((recBytes = reader.BaseStream.Read(recData, 0, recData.Length)) > 0)
+				{
+					recBytes = fileSize > recBytes ? recBytes : (int)fileSize;
+					fileStream.Write(recData, 0, recBytes);
+				}
+
+				Console.WriteLine(fileStream.Length);
+				fileStream.Close();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+			}
+			finally
+			{
+				reader?.Close();
+				writer?.Close();
+				networkStream?.Close();
+				client?.Close();
+			}
+		}
+
 
 		private static void GetFileNames(string ip, int portNumber, string method)
 		{
@@ -38,16 +91,12 @@ namespace FileSharingClient
 				networkStream = client.GetStream();
 
 				writer = new StreamWriter(networkStream) { AutoFlush = true };
-				
 
 				writer.WriteLine(method);
 
-				while (true)
-				{
-					reader = new StreamReader(networkStream);
-					var result = reader.ReadLine();
-					Console.WriteLine(result);
-				}
+				reader = new StreamReader(networkStream);
+				var result = reader.ReadLine();
+				Console.WriteLine(result);
 			}
 			catch (Exception ex)
 			{
