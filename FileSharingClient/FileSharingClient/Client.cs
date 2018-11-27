@@ -24,7 +24,7 @@ namespace FileSharingClient
 				networkStream = client.GetStream();
 
 				writer = new StreamWriter(networkStream) { AutoFlush = true };
-				reader = new StreamReader(networkStream);
+				reader = new StreamReader(client.GetStream());
 
 				writer.WriteLine("avatar.jpg");
 				var fs = new FileStream(SendingFilePath, FileMode.Open, FileAccess.Read);
@@ -45,19 +45,8 @@ namespace FileSharingClient
 					fs.Read(sendingBuffer, 0, currentPacketLength);
 					writer.BaseStream.Write(sendingBuffer, 0, sendingBuffer.Length);
 				}
-				writer.WriteLine("client done");
 
 				Console.WriteLine("Sent " + fs.Length + " bytes to the server");
-
-				while (true)
-				{
-					var result = reader.ReadLine();
-					if ("done".Equals(result))
-					{
-						Console.WriteLine(result);
-						break;
-					}
-				}
 			}
 			catch (Exception ex)
 			{

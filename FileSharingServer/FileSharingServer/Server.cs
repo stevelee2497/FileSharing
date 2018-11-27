@@ -33,7 +33,7 @@ namespace FileSharingServer
 			NetworkStream stream = null;
 			StreamReader reader = null;
 			StreamWriter writer = null;
-
+			FileStream fileStream = null;
 			try
 			{
 				stream = new NetworkStream(socket);
@@ -42,42 +42,18 @@ namespace FileSharingServer
 
 				var fileName = reader.ReadLine();
 				var totalLength = Convert.ToInt64(reader.ReadLine());
-				Console.WriteLine(fileName + " " + totalLength);
-				byte[] recData = new byte[BufferSize];
-				var fileStream = new FileStream(Path.Combine(BaseUrl, fileName), FileMode.OpenOrCreate, FileAccess.Write);
-				try
+				var recData = new byte[BufferSize];
+				fileStream = new FileStream(Path.Combine(BaseUrl, fileName), FileMode.OpenOrCreate, FileAccess.Write);
+				int recBytes;
+				while ((recBytes = stream.Read(recData, 0, recData.Length)) > 0)
 				{
-					var recBytes = BufferSize;
-					while (totalLength > 0)
-					{
-						recBytes = BufferSize < totalLength ? BufferSize : (int)totalLength;
-						Console.Write(recBytes + " ");
-						recBytes = stream.Read(recData, 0, recBytes);
-						Console.WriteLine(recBytes);
-						fileStream.Write(recData, 0, recBytes);
-						totalLength -= recBytes;
-					}
-					Console.WriteLine(totalLength + " " + recBytes);
-
-					Console.WriteLine(reader.ReadLine());
-					Console.WriteLine("server done");
-
-					while (true)
-					{
-						writer.WriteLine("done");
-					}
-
+					recBytes = totalLength > recBytes ? recBytes : (int)totalLength;
+					fileStream.Write(recData, 0, recBytes);
 				}
-				catch (Exception e)
-				{
-					Console.WriteLine(e);
-				}
-				finally
-				{
-					fileStream.Close();
-					
-					Console.WriteLine("=============================================");
-				}
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e.StackTrace);
 			}
 			finally
 			{
@@ -85,6 +61,8 @@ namespace FileSharingServer
 				writer?.Close();
 				stream?.Close();
 				socket.Close();
+				fileStream?.Close();
+
 			}
 		}
 	}
