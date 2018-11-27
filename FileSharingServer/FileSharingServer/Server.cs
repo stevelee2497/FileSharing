@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace FileSharingServer
 {
@@ -21,11 +23,11 @@ namespace FileSharingServer
 
 			while (true)
 			{
-				SaveFile(listener.AcceptSocket());
+				HandleClient(listener.AcceptSocket());
 			}
 		}
 
-		private static void SaveFile(Socket socket)
+		private static void HandleClient(Socket socket)
 		{
 			Console.WriteLine("=============================================");
 			Console.WriteLine($"{socket.RemoteEndPoint} has connected");
@@ -33,23 +35,26 @@ namespace FileSharingServer
 			NetworkStream stream = null;
 			StreamReader reader = null;
 			StreamWriter writer = null;
-			FileStream fileStream = null;
 			try
 			{
 				stream = new NetworkStream(socket);
 				reader = new StreamReader(stream);
-				writer = new StreamWriter(stream);
+				writer = new StreamWriter(stream) { AutoFlush = true };
 
-				var fileName = reader.ReadLine();
-				var totalLength = Convert.ToInt64(reader.ReadLine());
-				var recData = new byte[BufferSize];
-				fileStream = new FileStream(Path.Combine(BaseUrl, fileName), FileMode.OpenOrCreate, FileAccess.Write);
-				int recBytes;
-				while ((recBytes = stream.Read(recData, 0, recData.Length)) > 0)
+				var method = reader.ReadLine();
+
+				switch (method)
 				{
-					recBytes = totalLength > recBytes ? recBytes : (int)totalLength;
-					fileStream.Write(recData, 0, recBytes);
+					case "POST_FILE":
+						SaveFile(reader);
+						break;
+					case "GET_FILES":
+						SendFileNames(writer);
+						break;
 				}
+
+				
+
 			}
 			catch (Exception e)
 			{
@@ -57,13 +62,41 @@ namespace FileSharingServer
 			}
 			finally
 			{
-				reader?.Close();
-				writer?.Close();
 				stream?.Close();
 				socket.Close();
-				fileStream?.Close();
-
 			}
+		}
+
+		private static void SendFileNames(StreamWriter writer)
+		{
+			while (true)
+			{
+				var fileNames = new[]
+				{
+					"avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg",
+				};
+				Console.WriteLine(fileNames);
+				writer.WriteLine();
+				Console.ReadKey();
+			}
+		}
+
+		private static void SaveFile(StreamReader reader)
+		{
+			var fileName = reader.ReadLine();
+			var totalLength = Convert.ToInt64(reader.ReadLine());
+			Console.Write(totalLength + " ");
+			var recData = new byte[BufferSize];
+			var fileStream = new FileStream(Path.Combine(BaseUrl, fileName), FileMode.OpenOrCreate, FileAccess.Write);
+			int recBytes;
+			while ((recBytes = reader.BaseStream.Read(recData, 0, recData.Length)) > 0)
+			{
+				recBytes = totalLength > recBytes ? recBytes : (int)totalLength;
+				fileStream.Write(recData, 0, recBytes);
+			}
+
+			Console.WriteLine(fileStream.Length);
+			fileStream.Close();
 		}
 	}
 }
