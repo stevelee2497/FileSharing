@@ -16,14 +16,14 @@ namespace FileSharingClient
 		public static void Main(string[] args)
 		{
 			var method = "POST_FILE";
-			var ip = "127.0.0.1";
+			var ip = "192.168.51.177";
 			var portNumber = 8080;
 
-			//PostFile(ip, portNumber, method);
+			PostFile(ip, portNumber, method);
 
 			//GetFileNames(ip, portNumber, "GET_FILES");
 
-			GetImage(ip, portNumber, "GET_IMAGE");
+			//GetImage(ip, portNumber, "GET_IMAGE");
 
 			Console.WriteLine("press any key to exit ...");
 			Console.ReadKey();
@@ -52,17 +52,20 @@ namespace FileSharingClient
 
 				Console.WriteLine(fileSize);
 
+				var image = new byte[fileSize];
+
 				var recData = new byte[BufferSize];
-				var fileStream = new FileStream(Path.Combine(BaseUrl, fileName), FileMode.OpenOrCreate, FileAccess.Write);
+				var stream = new MemoryStream(image);
 				int recBytes;
 				while ((recBytes = reader.BaseStream.Read(recData, 0, recData.Length)) > 0)
 				{
-					recBytes = fileSize > recBytes ? recBytes : (int)fileSize;
-					fileStream.Write(recData, 0, recBytes);
+					stream.Write(recData, 0, recBytes);
 				}
 
-				Console.WriteLine(fileStream.Length);
-				fileStream.Close();
+				File.WriteAllBytes("d:\\client\\avatar.jpg", image);
+
+				Console.WriteLine(stream.Length);
+				stream.Close();
 			}
 			catch (Exception ex)
 			{

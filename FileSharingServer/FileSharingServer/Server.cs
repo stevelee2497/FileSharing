@@ -9,13 +9,13 @@ namespace FileSharingServer
 {
 	public class Server
 	{
-		private const string BaseUrl = "e:\\server";
+		private const string BaseUrl = "d:\\server";
 		private const int PortNumber = 8080;
 		private const int BufferSize = 1024;
 
 		public static void Main(string[] args)
 		{
-			var listener = new TcpListener(IPAddress.Parse("127.0.0.1"), PortNumber);
+			var listener = new TcpListener(IPAddress.Parse("192.168.51.177"), PortNumber);
 			listener.Start();
 
 			Console.WriteLine("Server started on " + listener.LocalEndpoint);
@@ -64,6 +64,7 @@ namespace FileSharingServer
 			{
 				stream?.Close();
 				socket.Close();
+				Console.WriteLine("=============================================");
 			}
 		}
 
