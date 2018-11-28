@@ -46,7 +46,7 @@ namespace FileSharingServer
 				switch (method)
 				{
 					case "POST_FILE":
-						SaveFile(reader);
+						SaveFile(socket, reader, writer);
 						break;
 					case "GET_FILES":
 						SendFileNames(writer);
@@ -87,22 +87,26 @@ namespace FileSharingServer
 			writer.WriteLine(string.Join(',', fileNames));
 		}
 
-		private static void SaveFile(StreamReader reader)
+		private static void SaveFile(Socket socket, StreamReader reader, StreamWriter writer)
 		{
 			var fileName = reader.ReadLine();
 			var totalLength = Convert.ToInt64(reader.ReadLine());
 			Console.Write(totalLength + " ");
 			var recData = new byte[BufferSize];
 			var fileStream = new FileStream(Path.Combine(BaseUrl, fileName), FileMode.OpenOrCreate, FileAccess.Write);
-			int recBytes;
-			while ((recBytes = reader.BaseStream.Read(recData, 0, recData.Length)) > 0)
+			int recBytes = 1;
+			while (fileStream.Length < totalLength && recBytes >0)
 			{
-				recBytes = totalLength > recBytes ? recBytes : (int)totalLength;
+				recBytes = reader.BaseStream.Read(recData, 0, recData.Length);
 				fileStream.Write(recData, 0, recBytes);
 			}
-
 			Console.WriteLine(fileStream.Length);
 			fileStream.Close();
+			while (true)
+			{
+				writer.WriteLine("done");
+				
+			}
 		}
 	}
 }

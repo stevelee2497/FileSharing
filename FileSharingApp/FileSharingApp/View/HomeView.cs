@@ -135,7 +135,18 @@ namespace FileSharingApp.View
 				writer.WriteLine(fileData.DataArray.Length);
 
 				writer.BaseStream.Write(fileData.DataArray, 0, fileData.DataArray.Length);
-				writer.BaseStream.Close();
+				while (true)
+				{
+					var result = reader.ReadLine();
+
+					Console.WriteLine(result);
+
+					if ("done".Equals(result))
+					{
+						writer.Close();
+						break;
+					}
+				}
 			}
 			catch (Exception ex)
 			{

@@ -131,27 +131,44 @@ namespace FileSharingClient
 
 				writer.WriteLine(method);
 				writer.WriteLine("avatar.jpg");
-				var fs = new FileStream(SendingFilePath, FileMode.Open, FileAccess.Read);
-				var noOfPackets = Convert.ToInt32(Math.Ceiling(Convert.ToDouble(fs.Length) / Convert.ToDouble(BufferSize)));
-				var totalLength = (int) fs.Length;
-				writer.WriteLine(fs.Length);
-				for (var i = 0; i < noOfPackets; i++)
+				//var fs = new FileStream(SendingFilePath, FileMode.Open, FileAccess.Read);
+				//var noOfPackets = Convert.ToInt32(Math.Ceiling(Convert.ToDouble(fs.Length) / Convert.ToDouble(BufferSize)));
+				//var totalLength = (int) fs.Length;
+				//writer.WriteLine(fs.Length);
+				//for (var i = 0; i < noOfPackets; i++)
+				//{
+				//	int currentPacketLength;
+				//	if (totalLength > BufferSize)
+				//	{
+				//		currentPacketLength = BufferSize;
+				//		totalLength = totalLength - currentPacketLength;
+				//	}
+				//	else
+				//		currentPacketLength = totalLength;
+
+				//	var sendingBuffer = new byte[currentPacketLength];
+				//	fs.Read(sendingBuffer, 0, currentPacketLength);
+				//	writer.BaseStream.Write(sendingBuffer, 0, sendingBuffer.Length);
+				//}
+
+				var fileData = File.ReadAllBytes(SendingFilePath);
+				writer.WriteLine(fileData.Length);
+
+				writer.BaseStream.Write(fileData, 0, fileData.Length);
+
+				while (true)
 				{
-					int currentPacketLength;
-					if (totalLength > BufferSize)
+					var result = reader.ReadLine();
+					
+					Console.WriteLine(result);
+
+					if ("done".Equals(result))
 					{
-						currentPacketLength = BufferSize;
-						totalLength = totalLength - currentPacketLength;
+						writer.Close();
+						Console.WriteLine("Sent " + fileData.Length + " bytes to the server");
+						break;
 					}
-					else
-						currentPacketLength = totalLength;
-
-					var sendingBuffer = new byte[currentPacketLength];
-					fs.Read(sendingBuffer, 0, currentPacketLength);
-					writer.BaseStream.Write(sendingBuffer, 0, sendingBuffer.Length);
 				}
-
-				Console.WriteLine("Sent " + fs.Length + " bytes to the server");
 			}
 			catch (Exception ex)
 			{
