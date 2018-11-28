@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+	<ImageView
+		android:id="@+id/imgMain"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:src="@drawable/default_image"
+		android:background="#000"/>
+
+	<ImageView
+		android:id="@+id/closeBtn"
+		android:layout_width="30dp"
+		android:layout_height="30dp"
+		android:src="@drawable/close"
+		android:tint="#fff"
+		android:layout_alignParentRight="true"
+		android:layout_margin="10dp"/>
+
+	<ImageView
+		android:id="@+id/downloadBtn"
+		android:layout_width="30dp"
+		android:layout_height="30dp"
+		android:src="@drawable/down_load"
+		android:tint="#fff"
+		android:layout_toLeftOf="@id/closeBtn"
+		android:layout_marginTop="10dp"/>
+
+</RelativeLayout>
