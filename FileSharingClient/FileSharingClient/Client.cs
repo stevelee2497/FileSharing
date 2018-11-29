@@ -156,19 +156,19 @@ namespace FileSharingClient
 
 				writer.BaseStream.Write(fileData, 0, fileData.Length);
 
-				while (true)
-				{
-					var result = reader.ReadLine();
+				//while (true)
+				//{
+				//	var result = reader.ReadLine();
 					
-					Console.WriteLine(result);
+				//	Console.WriteLine(result);
 
-					if ("done".Equals(result))
-					{
-						writer.Close();
-						Console.WriteLine("Sent " + fileData.Length + " bytes to the server");
-						break;
-					}
-				}
+				//	if ("done".Equals(result))
+				//	{
+				//		writer.Close();
+				//		Console.WriteLine("Sent " + fileData.Length + " bytes to the server");
+				//		break;
+				//	}
+				//}
 			}
 			catch (Exception ex)
 			{

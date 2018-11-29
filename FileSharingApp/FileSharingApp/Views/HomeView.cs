@@ -1,4 +1,10 @@
-﻿using Android.App;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Support.V4.Content;
@@ -7,18 +13,14 @@ using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
 using FileSharingApp.Helpers;
+using FileSharingApp.Models;
 using Plugin.CurrentActivity;
 using Plugin.FilePicker;
+using Plugin.FilePicker.Abstractions;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using Plugin.FilePicker.Abstractions;
 
-namespace FileSharingApp.View
+namespace FileSharingApp.Views
 {
 	[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
 	public class HomeView : AppCompatActivity
@@ -107,15 +109,38 @@ namespace FileSharingApp.View
 				Name = DateTime.Now.ToShortTimeString(),
 				Directory = "FileSharing"
 			});
+
+			var fileSharingData = new FileSharingData()
+			{
+				FileName = string.Join('.', DateTimeOffset.Now.ToString("dd-MM-yyyy-HH-mm-tt"),"jpg"),
+				FilePath = file.Path,
+				FileData = File.ReadAllBytes(file.Path)
+			};
+
+			await PostFile(_ip, _portNumber, "POST_FILE", fileSharingData);
+
+
+			GetFileNames(_ip, _portNumber, "GET_FILES");
+			_fileAdapter = new FileAdapter(_files);
+			_rvFiles.SetAdapter(_fileAdapter);
 		}
 
 		private async void UploadFileBtn(object sender, EventArgs e)
 		{
 			var file = await CrossFilePicker.Current.PickFile();
-			PostFile(_ip, _portNumber, "POST_FILE", file);
+
+			await PostFile(_ip, _portNumber, "POST_FILE", new FileSharingData
+			{
+				FileName = file.FileName,
+				FileData = file.DataArray
+			});
+
+			GetFileNames(_ip, _portNumber, "GET_FILES");
+			_fileAdapter = new FileAdapter(_files);
+			_rvFiles.SetAdapter(_fileAdapter);
 		}
 
-		private void PostFile(string ip, int portNumber, string method, FileData fileData)
+		private async Task PostFile(string ip, int portNumber, string method, FileSharingData file)
 		{
 			TcpClient client = null;
 			NetworkStream networkStream = null;
@@ -128,25 +153,18 @@ namespace FileSharingApp.View
 				networkStream = client.GetStream();
 
 				writer = new StreamWriter(networkStream) { AutoFlush = true };
-				reader = new StreamReader(client.GetStream());
 
 				writer.WriteLine(method);
-				writer.WriteLine(fileData.FileName);
-				writer.WriteLine(fileData.DataArray.Length);
+				writer.WriteLine(file.FileName);
+				writer.WriteLine(file.FileData.Length);
 
-				writer.BaseStream.Write(fileData.DataArray, 0, fileData.DataArray.Length);
-				while (true)
-				{
-					var result = reader.ReadLine();
+				await Task.Delay(50);
 
-					Console.WriteLine(result);
+				writer.BaseStream.Write(file.FileData, 0, file.FileData.Length);
 
-					if ("done".Equals(result))
-					{
-						writer.Close();
-						break;
-					}
-				}
+				await Task.Delay(50);
+
+				writer.Close();
 			}
 			catch (Exception ex)
 			{

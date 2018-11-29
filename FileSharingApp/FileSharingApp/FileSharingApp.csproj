@@ -57,8 +57,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\CommonHelpers.cs" />
-    <Compile Include="View\FileDetailView.cs" />
-    <Compile Include="View\HomeView.cs" />
+    <Compile Include="Models\FileSharingData.cs" />
+    <Compile Include="Views\FileDetailView.cs" />
+    <Compile Include="Views\HomeView.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -94,6 +95,9 @@
     <AndroidResource Include="Resources\mipmap-xxxhdpi\ic_launcher_round.png" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Square.Picasso">
+      <Version>2.5.2.1</Version>
+    </PackageReference>
     <PackageReference Include="Xam.Plugin.Media">
       <Version>4.0.1.5</Version>
     </PackageReference>

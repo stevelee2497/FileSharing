@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FileSharingServer
@@ -46,13 +47,16 @@ namespace FileSharingServer
 				switch (method)
 				{
 					case "POST_FILE":
-						SaveFile(socket, reader, writer);
+						SaveFile(reader, writer);
 						break;
 					case "GET_FILES":
 						SendFileNames(writer);
 						break;
 					case "GET_IMAGE":
-						SendFile(writer, reader);
+						SendFile(reader, writer);
+						break;
+					case "DELETE_FILE":
+						DeleteFile(reader, writer);
 						break;
 				}
 			}
@@ -68,45 +72,58 @@ namespace FileSharingServer
 			}
 		}
 
-		private static void SendFile(StreamWriter writer, StreamReader reader)
+		private static void DeleteFile(StreamReader reader, StreamWriter writer)
+		{
+			var fileName = reader.ReadLine();
+			File.Delete(Path.Combine(BaseUrl, fileName));
+			writer.WriteLine("done");
+		}
+
+		private static void SendFile(StreamReader reader, StreamWriter writer)
 		{
 			var fileName = reader.ReadLine();
 
 			var data = File.ReadAllBytes(Path.Combine(BaseUrl, fileName));
 			writer.WriteLine(data.Length);
+			Thread.Sleep(50);
 			writer.BaseStream.Write(data, 0, data.Length);
+			Thread.Sleep(2000);
 			writer.Close();
 		}
 
 		private static void SendFileNames(StreamWriter writer)
 		{
-			var fileNames = new[]
-			{
-				"avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg", "avatar.jpg",
-			};
-			writer.WriteLine(string.Join(',', fileNames));
+			var fileNames = Directory.GetFileSystemEntries(BaseUrl);
+			var result = string.Join(',', fileNames.Select(Path.GetFileName));
+			writer.WriteLine(result);
 		}
 
-		private static void SaveFile(Socket socket, StreamReader reader, StreamWriter writer)
+		private static void SaveFile(StreamReader reader, StreamWriter writer)
 		{
 			var fileName = reader.ReadLine();
 			var totalLength = Convert.ToInt64(reader.ReadLine());
 			Console.Write(totalLength + " ");
 			var recData = new byte[BufferSize];
-			var fileStream = new FileStream(Path.Combine(BaseUrl, fileName), FileMode.OpenOrCreate, FileAccess.Write);
+			var filePath = Path.Combine(BaseUrl, fileName);
+			if (File.Exists(filePath))
+			{
+				File.Delete(filePath);
+			}
+			var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
 			int recBytes = 1;
 			while (fileStream.Length < totalLength && recBytes >0)
 			{
 				recBytes = reader.BaseStream.Read(recData, 0, recData.Length);
+				Console.WriteLine(recBytes);
 				fileStream.Write(recData, 0, recBytes);
 			}
 			Console.WriteLine(fileStream.Length);
 			fileStream.Close();
-			while (true)
-			{
-				writer.WriteLine("done");
-				
-			}
+
+			//while (true)
+			//{
+			//	writer.WriteLine("done");
+			//}
 		}
 	}
 }
