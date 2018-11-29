@@ -115,7 +115,6 @@ namespace FileSharingServer
 			while (fileStream.Length < totalLength && recBytes >0)
 			{
 				recBytes = reader.BaseStream.Read(recData, 0, recData.Length);
-				Console.WriteLine(recBytes);
 				fileStream.Write(recData, 0, recBytes);
 			}
 			Console.WriteLine(fileStream.Length);

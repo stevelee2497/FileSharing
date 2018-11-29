@@ -1,10 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
-using Android.App;
-using Android.Graphics;
+﻿using Android.App;
 using Android.OS;
 using Android.Support.V4.Content;
 using Android.Support.V7.App;
@@ -12,7 +6,11 @@ using Android.Widget;
 using FFImageLoading;
 using FFImageLoading.Cross;
 using FileSharingApp.Helpers;
-using Square.Picasso;
+using System;
+using System.IO;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FileSharingApp.Views
 {
@@ -20,8 +18,8 @@ namespace FileSharingApp.Views
 	public class FileDetailView : AppCompatActivity
 	{
 		private const int BufferSize = 1024;
-		private string _ip = "10.0.143.67";
-		private int _portNumber = 8080;
+		private string _ip;
+		private int _portNumber;
 
 		public static string FileName = "File Name";
 		private MvxCachedImageView _image;
@@ -36,6 +34,8 @@ namespace FileSharingApp.Views
 			base.OnCreate(savedInstanceState);
 			SetContentView(Resource.Layout.file_detail);
 
+			_ip = Intent.GetStringExtra(LoginView.HostIp);
+			_portNumber = Intent.GetIntExtra(LoginView.PortNumber, 8080);
 			_fileName = Intent.GetStringExtra(FileName);
 			_image = FindViewById<MvxCachedImageView>(Resource.Id.imgMain);
 

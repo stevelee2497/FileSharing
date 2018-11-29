@@ -35,7 +35,7 @@
                 android:src="@drawable/server" />
 
 			<EditText
-                android:id="@+id/edtUserName"
+                android:id="@+id/edtHostIp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
@@ -56,24 +56,23 @@
                 android:src="@drawable/port" />
 
 			<EditText
-                android:id="@+id/edtPassword"
+                android:id="@+id/edtPort"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
-                android:hint="port"
-                android:inputType="textPassword" />
+                android:hint="port"/>
 		</LinearLayout>
 
 		<Button
-            android:id="@+id/btnLogin"
+            android:id="@+id/connectBtn"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="20dp"
             android:background="@drawable/button_pink"
             android:text="kết nối"
-            android:textColor="@color/white" />
+            android:textColor="#fff" />
 	</LinearLayout>
 
 

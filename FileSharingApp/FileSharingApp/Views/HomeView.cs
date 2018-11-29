@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Threading.Tasks;
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Support.V4.Content;
@@ -16,17 +10,22 @@ using FileSharingApp.Helpers;
 using FileSharingApp.Models;
 using Plugin.CurrentActivity;
 using Plugin.FilePicker;
-using Plugin.FilePicker.Abstractions;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace FileSharingApp.Views
 {
-	[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+	[Activity(Label = "@string/app_name", Theme = "@style/AppTheme")]
 	public class HomeView : AppCompatActivity
 	{
-		private string _ip = "10.0.143.67";
-		private int _portNumber = 8080;
+		private string _ip;
+		private int _portNumber;
 		private List<string> _files;
 
 		private ImageView _uploadFileBtn;
@@ -38,6 +37,9 @@ namespace FileSharingApp.Views
 		{
 			base.OnCreate(savedInstanceState);
 			SetContentView(Resource.Layout.activity_main);
+
+			_ip = Intent.GetStringExtra(LoginView.HostIp);
+			_portNumber = Intent.GetIntExtra(LoginView.PortNumber, 8080);
 
 			CrossCurrentActivity.Current.Init(this, savedInstanceState);
 			CrossMedia.Current.Initialize();
@@ -51,7 +53,7 @@ namespace FileSharingApp.Views
 			GetFileNames(_ip, _portNumber, "GET_FILES");
 
 			_rvFiles = FindViewById<RecyclerView>(Resource.Id.recyclerView);
-			_fileAdapter = new FileAdapter(_files);
+			_fileAdapter = new FileAdapter(_files, _ip, _portNumber);
 			_rvFiles.SetLayoutManager(new GridLayoutManager(this, 4));
 			_rvFiles.SetAdapter(_fileAdapter);
 		}
@@ -126,7 +128,7 @@ namespace FileSharingApp.Views
 
 
 			GetFileNames(_ip, _portNumber, "GET_FILES");
-			_fileAdapter = new FileAdapter(_files);
+			_fileAdapter = new FileAdapter(_files, _ip, _portNumber);
 			_rvFiles.SetAdapter(_fileAdapter);
 		}
 
@@ -146,11 +148,11 @@ namespace FileSharingApp.Views
 			});
 
 			GetFileNames(_ip, _portNumber, "GET_FILES");
-			_fileAdapter = new FileAdapter(_files);
+			_fileAdapter = new FileAdapter(_files, _ip, _portNumber);
 			_rvFiles.SetAdapter(_fileAdapter);
 		}
 
-		private Task PostFile(string ip, int portNumber, string method, FileSharingData file) => new Task(async () =>
+		private Task PostFile(string ip, int portNumber, string method, FileSharingData file) => Task.Run(async () =>  
 		{
 			TcpClient client = null;
 			NetworkStream networkStream = null;
@@ -191,10 +193,14 @@ namespace FileSharingApp.Views
 	public class FileAdapter : RecyclerView.Adapter
 	{
 		private readonly List<string> _images;
+		private readonly string _ip;
+		private readonly int _portNumber;
 
-		public FileAdapter(List<string> images)
+		public FileAdapter(List<string> images, string _ip, int _portNumber)
 		{
 			_images = images;
+			this._ip = _ip;
+			this._portNumber = _portNumber;
 		}
 
 		public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
@@ -205,7 +211,10 @@ namespace FileSharingApp.Views
 
 		public override void OnBindViewHolder(RecyclerView.ViewHolder viewHolder, int position)
 		{
-			((FileViewHolder)viewHolder).ImageName = _images[position];
+			var holder = ((FileViewHolder)viewHolder);
+			holder.HostIp = _ip;
+			holder.PortNumber = _portNumber;
+			holder.ImageName = _images[position];
 		}
 
 		public override int ItemCount => _images.Count;
@@ -213,6 +222,8 @@ namespace FileSharingApp.Views
 
 	public class FileViewHolder : RecyclerView.ViewHolder
 	{
+		public string HostIp { get; set; }
+		public int PortNumber { get; set; }
 		public string ImageName
 		{
 			set
@@ -227,7 +238,7 @@ namespace FileSharingApp.Views
 		public ImageView Image { get; private set; }
 		public TextView TvName { get; private set; }
 
-		public FileViewHolder(Android.Views.View itemView) : base(itemView)
+		public FileViewHolder(View itemView) : base(itemView)
 		{
 			Image = itemView.FindViewById<ImageView>(Resource.Id.image);
 			TvName = itemView.FindViewById<TextView>(Resource.Id.tvName);
@@ -239,6 +250,8 @@ namespace FileSharingApp.Views
 		{
 			var intent = new Intent(ItemView.Context, typeof(FileDetailView));
 			intent.PutExtra("File Name", TvName.Text);
+			intent.PutExtra(LoginView.HostIp, HostIp);
+			intent.PutExtra(LoginView.PortNumber, PortNumber);
 			ItemView.Context.StartActivity(intent);
 		}
 	}
