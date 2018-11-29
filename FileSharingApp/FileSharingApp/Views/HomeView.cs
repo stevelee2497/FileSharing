@@ -25,7 +25,7 @@ namespace FileSharingApp.Views
 	[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
 	public class HomeView : AppCompatActivity
 	{
-		private string _ip = "192.168.51.177";
+		private string _ip = "10.0.143.67";
 		private int _portNumber = 8080;
 		private List<string> _files;
 
@@ -86,7 +86,7 @@ namespace FileSharingApp.Views
 
 				reader = new StreamReader(networkStream);
 				var result = reader.ReadLine();
-				_files = result?.Split(",").ToList();
+				_files = result?.Split(',').ToList();
 			}
 			catch (Exception ex)
 			{
@@ -110,9 +110,14 @@ namespace FileSharingApp.Views
 				Directory = "FileSharing"
 			});
 
+			if (file == null)
+			{
+				return;
+			}
+
 			var fileSharingData = new FileSharingData()
 			{
-				FileName = string.Join('.', DateTimeOffset.Now.ToString("dd-MM-yyyy-HH-mm-tt"),"jpg"),
+				FileName = string.Join(".", DateTimeOffset.Now.ToString("dd-MM-yyyy-HH-mm-tt"),"jpg"),
 				FilePath = file.Path,
 				FileData = File.ReadAllBytes(file.Path)
 			};
@@ -129,6 +134,11 @@ namespace FileSharingApp.Views
 		{
 			var file = await CrossFilePicker.Current.PickFile();
 
+			if (file == null)
+			{
+				return;
+			}
+
 			await PostFile(_ip, _portNumber, "POST_FILE", new FileSharingData
 			{
 				FileName = file.FileName,
@@ -140,7 +150,7 @@ namespace FileSharingApp.Views
 			_rvFiles.SetAdapter(_fileAdapter);
 		}
 
-		private async Task PostFile(string ip, int portNumber, string method, FileSharingData file)
+		private Task PostFile(string ip, int portNumber, string method, FileSharingData file) => new Task(async () =>
 		{
 			TcpClient client = null;
 			NetworkStream networkStream = null;
@@ -151,7 +161,7 @@ namespace FileSharingApp.Views
 				client = new TcpClient(ip, portNumber);
 				Console.WriteLine("Connected to the Server...\n");
 				networkStream = client.GetStream();
-
+				reader = new StreamReader(networkStream);
 				writer = new StreamWriter(networkStream) { AutoFlush = true };
 
 				writer.WriteLine(method);
@@ -159,12 +169,10 @@ namespace FileSharingApp.Views
 				writer.WriteLine(file.FileData.Length);
 
 				await Task.Delay(50);
-
 				writer.BaseStream.Write(file.FileData, 0, file.FileData.Length);
+				writer.BaseStream.Flush();
 
-				await Task.Delay(50);
-
-				writer.Close();
+				var result = reader.ReadLine();
 			}
 			catch (Exception ex)
 			{
@@ -177,7 +185,7 @@ namespace FileSharingApp.Views
 				networkStream?.Close();
 				client?.Close();
 			}
-		}
+		});
 	}
 
 	public class FileAdapter : RecyclerView.Adapter

@@ -16,17 +16,22 @@ namespace FileSharingClient
 		public static void Main(string[] args)
 		{
 			var method = "POST_FILE";
-			var ip = "192.168.51.177";
+			var ip = "10.0.143.67";
 			var portNumber = 8080;
 
-			PostFile(ip, portNumber, method);
+			
 
-			//GetFileNames(ip, portNumber, "GET_FILES");
+			while (true)
+			{
+				//PostFile(ip, portNumber, method);
 
-			//GetImage(ip, portNumber, "GET_IMAGE");
+				//GetFileNames(ip, portNumber, "GET_FILES");
 
-			Console.WriteLine("press any key to exit ...");
-			Console.ReadKey();
+				GetImage(ip, portNumber, "GET_IMAGE");
+
+				Console.WriteLine("press any key to exit ...");
+				Console.ReadKey();
+			}
 		}
 
 		private static void GetImage(string ip, int portNumber, string method)
@@ -43,7 +48,7 @@ namespace FileSharingClient
 				writer = new StreamWriter(networkStream) { AutoFlush = true };
 				reader = new StreamReader(networkStream);
 
-				var fileName = "avatar.jpg";
+				var fileName = "11766822255_fb570f2c31_o.jpg";
 
 				writer.WriteLine(method);
 				writer.WriteLine(fileName);
@@ -56,13 +61,20 @@ namespace FileSharingClient
 
 				var recData = new byte[BufferSize];
 				var stream = new MemoryStream(image);
-				int recBytes;
-				while ((recBytes = reader.BaseStream.Read(recData, 0, recData.Length)) > 0)
+				int recBytes = 1;
+				while (stream.Position < fileSize && recBytes > 0)
 				{
+					recBytes = reader.BaseStream.Read(recData, 0, recData.Length);
 					stream.Write(recData, 0, recBytes);
 				}
 
-				File.WriteAllBytes("d:\\client\\avatar.jpg", image);
+				var filePath = Path.Combine(BaseUrl, fileName);
+				if (File.Exists(filePath))
+				{
+					File.Delete(filePath);
+				}
+
+				File.WriteAllBytes(filePath, image);
 
 				Console.WriteLine(stream.Length);
 				stream.Close();
@@ -92,12 +104,10 @@ namespace FileSharingClient
 				client = new TcpClient(ip, portNumber);
 				Console.WriteLine("Connected to the Server...\n");
 				networkStream = client.GetStream();
-
 				writer = new StreamWriter(networkStream) { AutoFlush = true };
+				reader = new StreamReader(networkStream);
 
 				writer.WriteLine(method);
-
-				reader = new StreamReader(networkStream);
 				var result = reader.ReadLine();
 				Console.WriteLine(result);
 			}

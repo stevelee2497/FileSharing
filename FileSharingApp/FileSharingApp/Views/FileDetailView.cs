@@ -20,7 +20,7 @@ namespace FileSharingApp.Views
 	public class FileDetailView : AppCompatActivity
 	{
 		private const int BufferSize = 1024;
-		private string _ip = "192.168.51.177";
+		private string _ip = "10.0.143.67";
 		private int _portNumber = 8080;
 
 		public static string FileName = "File Name";
@@ -77,8 +77,6 @@ namespace FileSharingApp.Views
 
 				var recData = new byte[BufferSize];
 				_stream = new MemoryStream(_imageData);
-				Console.WriteLine("client side length:" + fileSize);
-
 
 				int recBytes = 1;
 
@@ -87,10 +85,6 @@ namespace FileSharingApp.Views
 					recBytes = reader.BaseStream.Read(recData, 0, recData.Length);
 					_stream.Write(recData, 0, recBytes);
 				}
-
-				Console.WriteLine("client side receive:" + _stream.Position);
-				//var bitmap = BitmapFactory.DecodeByteArray(image, 0, image.Length);
-				//_image.SetImageBitmap(bitmap);
 				_stream.Close();
 
 				ImageService.Instance.LoadStream(GetStream).DownSample(500).Into(_image);

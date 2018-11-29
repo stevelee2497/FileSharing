@@ -10,13 +10,13 @@ namespace FileSharingServer
 {
 	public class Server
 	{
-		private const string BaseUrl = "d:\\server";
+		private const string BaseUrl = "e:\\server";
 		private const int PortNumber = 8080;
 		private const int BufferSize = 1024;
 
 		public static void Main(string[] args)
 		{
-			var listener = new TcpListener(IPAddress.Parse("192.168.51.177"), PortNumber);
+			var listener = new TcpListener(IPAddress.Parse("10.0.143.67"), PortNumber);
 			listener.Start();
 
 			Console.WriteLine("Server started on " + listener.LocalEndpoint);
@@ -42,22 +42,25 @@ namespace FileSharingServer
 				reader = new StreamReader(stream);
 				writer = new StreamWriter(stream) { AutoFlush = true };
 
-				var method = reader.ReadLine();
-
-				switch (method)
+				while (!socket.IsSocketDisconnected())
 				{
-					case "POST_FILE":
-						SaveFile(reader, writer);
-						break;
-					case "GET_FILES":
-						SendFileNames(writer);
-						break;
-					case "GET_IMAGE":
-						SendFile(reader, writer);
-						break;
-					case "DELETE_FILE":
-						DeleteFile(reader, writer);
-						break;
+					var method = reader.ReadLine();
+
+					switch (method)
+					{
+						case "POST_FILE":
+							SaveFile(reader, writer);
+							break;
+						case "GET_FILES":
+							SendFileNames(writer);
+							break;
+						case "GET_IMAGE":
+							SendFile(reader, writer);
+							break;
+						case "DELETE_FILE":
+							DeleteFile(reader, writer);
+							break;
+					}
 				}
 			}
 			catch (Exception e)
@@ -82,13 +85,11 @@ namespace FileSharingServer
 		private static void SendFile(StreamReader reader, StreamWriter writer)
 		{
 			var fileName = reader.ReadLine();
-
 			var data = File.ReadAllBytes(Path.Combine(BaseUrl, fileName));
 			writer.WriteLine(data.Length);
 			Thread.Sleep(50);
 			writer.BaseStream.Write(data, 0, data.Length);
-			Thread.Sleep(2000);
-			writer.Close();
+			writer.BaseStream.Flush();
 		}
 
 		private static void SendFileNames(StreamWriter writer)
@@ -120,10 +121,7 @@ namespace FileSharingServer
 			Console.WriteLine(fileStream.Length);
 			fileStream.Close();
 
-			//while (true)
-			//{
-			//	writer.WriteLine("done");
-			//}
+			writer.WriteLine("done");
 		}
 	}
 }
