@@ -25,9 +25,9 @@ namespace FileSharingClient
 			{
 				//PostFile(ip, portNumber, method);
 
-				//GetFileNames(ip, portNumber, "GET_FILES");
+				GetFileNames(ip, portNumber, "GET_FILES");
 
-				GetImage(ip, portNumber, "GET_IMAGE");
+				//GetImage(ip, portNumber, "GET_IMAGE");
 
 				Console.WriteLine("press any key to exit ...");
 				Console.ReadKey();
@@ -108,8 +108,11 @@ namespace FileSharingClient
 				reader = new StreamReader(networkStream);
 
 				writer.WriteLine(method);
+
 				var result = reader.ReadLine();
+
 				Console.WriteLine(result);
+				Console.ReadKey();
 			}
 			catch (Exception ex)
 			{

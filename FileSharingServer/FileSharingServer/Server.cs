@@ -10,9 +10,7 @@ namespace FileSharingServer
 {
 	public class Server
 	{
-		private const string BaseUrl = "e:\\server";
 		private const int PortNumber = 8080;
-		private const int BufferSize = 1024;
 
 		public static void Main(string[] args)
 		{
@@ -24,25 +22,39 @@ namespace FileSharingServer
 
 			while (true)
 			{
-				HandleClient(listener.AcceptSocket());
+				var client = new ClientHandler(listener.AcceptSocket());
+				Task.Run(() => client.Listen());
 			}
 		}
+	}
 
-		private static void HandleClient(Socket socket)
+	public class ClientHandler
+	{
+		private const string BaseUrl = "e:\\server";
+		private const int BufferSize = 1024;
+
+		private readonly Socket _socket;
+
+		public ClientHandler(Socket socket)
+		{
+			_socket = socket;
+		}
+
+		public void Listen()
 		{
 			Console.WriteLine("=============================================");
-			Console.WriteLine($"{socket.RemoteEndPoint} has connected");
+			Console.WriteLine($"{_socket.RemoteEndPoint} has connected");
 
 			NetworkStream stream = null;
 			StreamReader reader = null;
 			StreamWriter writer = null;
 			try
 			{
-				stream = new NetworkStream(socket);
+				stream = new NetworkStream(_socket);
 				reader = new StreamReader(stream);
 				writer = new StreamWriter(stream) { AutoFlush = true };
 
-				while (!socket.IsSocketDisconnected())
+				while (!_socket.IsSocketDisconnected())
 				{
 					var method = reader.ReadLine();
 
@@ -70,19 +82,19 @@ namespace FileSharingServer
 			finally
 			{
 				stream?.Close();
-				socket.Close();
+				_socket.Close();
 				Console.WriteLine("=============================================");
 			}
 		}
 
-		private static void DeleteFile(StreamReader reader, StreamWriter writer)
+		private void DeleteFile(StreamReader reader, StreamWriter writer)
 		{
 			var fileName = reader.ReadLine();
 			File.Delete(Path.Combine(BaseUrl, fileName));
 			writer.WriteLine("done");
 		}
 
-		private static void SendFile(StreamReader reader, StreamWriter writer)
+		private void SendFile(StreamReader reader, StreamWriter writer)
 		{
 			var fileName = reader.ReadLine();
 			var data = File.ReadAllBytes(Path.Combine(BaseUrl, fileName));
@@ -92,14 +104,14 @@ namespace FileSharingServer
 			writer.BaseStream.Flush();
 		}
 
-		private static void SendFileNames(StreamWriter writer)
+		private void SendFileNames(StreamWriter writer)
 		{
 			var fileNames = Directory.GetFileSystemEntries(BaseUrl);
 			var result = string.Join(',', fileNames.Select(Path.GetFileName));
 			writer.WriteLine(result);
 		}
 
-		private static void SaveFile(StreamReader reader, StreamWriter writer)
+		private void SaveFile(StreamReader reader, StreamWriter writer)
 		{
 			var fileName = reader.ReadLine();
 			var totalLength = Convert.ToInt64(reader.ReadLine());
@@ -112,7 +124,7 @@ namespace FileSharingServer
 			}
 			var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
 			int recBytes = 1;
-			while (fileStream.Length < totalLength && recBytes >0)
+			while (fileStream.Length < totalLength && recBytes > 0)
 			{
 				recBytes = reader.BaseStream.Read(recData, 0, recData.Length);
 				fileStream.Write(recData, 0, recBytes);
