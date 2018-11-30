@@ -1,13 +1,12 @@
-﻿using System;
+﻿using Server.Helpers;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Excel = Microsoft.Office.Interop.Excel;
-
-namespace FileSharingServer
+namespace Server
 {
 	public class Server
 	{
@@ -68,7 +67,7 @@ namespace FileSharingServer
 							SaveFile(reader, writer);
 							break;
 						case "GET_FILES":
-							SendFileNames(writer);
+							SendFileNames(reader, writer);
 							break;
 						case "GET_IMAGE":
 							SendFile(reader, writer);
@@ -95,7 +94,10 @@ namespace FileSharingServer
 
 		private void Login(StreamReader reader, StreamWriter writer)
 		{
-			
+			var userName = reader.ReadLine();
+			var password = reader.ReadLine();
+
+			writer.WriteLine(Helper.Login(userName, password) ? "success" : "error");
 		}
 
 		private void DeleteFile(StreamReader reader, StreamWriter writer)
@@ -115,10 +117,10 @@ namespace FileSharingServer
 			writer.BaseStream.Flush();
 		}
 
-		private void SendFileNames(StreamWriter writer)
+		private void SendFileNames(StreamReader reader, StreamWriter writer)
 		{
 			var fileNames = Directory.GetFileSystemEntries(BaseUrl);
-			var result = string.Join(',', fileNames.Select(Path.GetFileName));
+			var result = string.Join(",", fileNames.Select(Path.GetFileName));
 			writer.WriteLine(result);
 		}
 
