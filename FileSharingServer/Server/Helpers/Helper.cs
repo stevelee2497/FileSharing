@@ -13,6 +13,7 @@ namespace Server.Helpers
 
 		public static bool SignUp(string userName, string password)
 		{
+			var result = true;
 			var xlApp = new Microsoft.Office.Interop.Excel.Application();
 			var xlWorkbook = xlApp.Workbooks.Open(@"E:\server\data.xlsx");
 			var xlWorksheet = xlWorkbook.Sheets[1];
@@ -23,7 +24,7 @@ namespace Server.Helpers
 			{
 				if (userName.Equals(xlRange.Cells[i, 1].Value2.ToString()))
 				{
-					return false;
+					result = false;
 				}
 			}
 
@@ -41,11 +42,13 @@ namespace Server.Helpers
 			xlApp.Quit();
 			Marshal.ReleaseComObject(xlApp);
 
-			return true;
+			return result;
 		}
 
 		public static bool Login(string userName, string password)
 		{
+			var result = false;
+
 			var xlApp = new Microsoft.Office.Interop.Excel.Application();
 			var xlWorkbook = xlApp.Workbooks.Open(@"E:\server\data.xlsx");
 			Microsoft.Office.Interop.Excel._Worksheet xlWorksheet = xlWorkbook.Sheets[1];
@@ -57,7 +60,7 @@ namespace Server.Helpers
 			{
 				if (userName.Equals(xlRange.Cells[i, 1].Value2.ToString()) && password.Equals(xlRange.Cells[i, 2].Value2.ToString()))
 				{
-					return true;
+					result = true;
 				}
 			}
 
@@ -77,7 +80,7 @@ namespace Server.Helpers
 			xlApp.Quit();
 			Marshal.ReleaseComObject(xlApp);
 
-			return false;
+			return result;
 		}
 	}
 }
