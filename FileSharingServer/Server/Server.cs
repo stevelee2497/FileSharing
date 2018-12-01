@@ -64,6 +64,9 @@ namespace Server
 					var headers = header.Split(',');
 					switch (headers[0])
 					{
+						case "SIGN_UP":
+							SignUn(headers[1], headers[2]);
+							break;
 						case "LOGIN":
 							Login(headers[1], headers[2]);
 							break;
@@ -95,6 +98,11 @@ namespace Server
 				_socket.Close();
 				Console.WriteLine("=============================================");
 			}
+		}
+
+		private void SignUn(string userName, string password)
+		{
+			_writer.WriteLine(Helper.Login(userName, password) ? "success" : "error");
 		}
 
 		private void Login(string userName, string password)

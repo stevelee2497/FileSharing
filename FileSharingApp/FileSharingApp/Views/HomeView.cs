@@ -44,9 +44,12 @@ namespace FileSharingApp.Views
 			_takePhotoBtn = FindViewById<ImageView>(Resource.Id.btnTakePhoto);
 
 			_files = _client.GetFileNames(_userName);
-			_fileAdapter = new FileAdapter(_files, _ip, _portNumber, _userName);
-			_rvFiles.SetLayoutManager(new GridLayoutManager(this, 4));
-			_rvFiles.SetAdapter(_fileAdapter);
+			if (_files != null)
+			{
+				_fileAdapter = new FileAdapter(_files, _ip, _portNumber, _userName);
+				_rvFiles.SetLayoutManager(new GridLayoutManager(this, 4));
+				_rvFiles.SetAdapter(_fileAdapter);
+			}
 
 			_uploadFileBtn.Click += UploadFileBtn;
 			_takePhotoBtn.Click += TakePhoto;
@@ -109,8 +112,11 @@ namespace FileSharingApp.Views
 		private void UpdateListView()
 		{
 			_files = _client.GetFileNames(_userName);
-			_fileAdapter = new FileAdapter(_files, _ip, _portNumber, _userName);
-			_rvFiles.SetAdapter(_fileAdapter);
+			if (_files != null)
+			{
+				_fileAdapter = new FileAdapter(_files, _ip, _portNumber, _userName);
+				_rvFiles.SetAdapter(_fileAdapter);
+			}
 		}
 	}
 }

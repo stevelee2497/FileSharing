@@ -13,19 +13,18 @@
 	<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
         android:orientation="vertical">
 
 		<ImageView
-            android:layout_width="160dp"
-            android:layout_height="160dp"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
             android:layout_gravity="center"
             android:src="@drawable/file_sharing_logo" />
 
 		<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp">
+            android:layout_margin="5dp">
 
 			<ImageView
                 android:layout_width="32dp"
@@ -40,13 +39,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
+                android:textSize="16sp"
                 android:hint="user name" />
 		</LinearLayout>
 
 		<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp">
+            android:layout_margin="5dp">
 
 			<ImageView
                 android:layout_width="32dp"
@@ -61,13 +61,38 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
+                android:textSize="16sp"
                 android:hint="password" />
+		</LinearLayout>
+
+		<LinearLayout
+            android:id="@+id/passwordRetypeView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:visibility="gone">
+
+			<ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/password" />
+
+			<EditText
+                android:id="@+id/edtPasswordRetype"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:textSize="16sp"
+                android:hint="retype password" />
 		</LinearLayout>
 
 		<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp">
+            android:layout_margin="5dp">
 
 			<ImageView
                 android:layout_width="32dp"
@@ -83,13 +108,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
+                android:textSize="16sp"
                 android:hint="ip" />
 		</LinearLayout>
 
 		<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp">
+            android:layout_margin="5dp">
 
 			<ImageView
                 android:layout_width="32dp"
@@ -105,18 +131,50 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
+                android:textSize="16sp"
                 android:hint="port" />
 		</LinearLayout>
 
 		<Button
             android:id="@+id/connectBtn"
             android:layout_width="200dp"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_gravity="center"
             android:layout_margin="20dp"
             android:background="@drawable/button_pink"
             android:text="kết nối"
             android:textColor="#fff" />
+
+		<Button
+            android:id="@+id/signUpBtn"
+            android:layout_width="200dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_margin="20dp"
+            android:background="@drawable/button_blue"
+            android:text="kết nối"
+            android:textColor="#fff"
+            android:visibility="gone" />
+
+		<TextView
+            android:id="@+id/tvSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Chưa có tài khoản? Đăng kí"
+            android:textColor="#0d70b2"
+            android:textSize="20sp" />
+
+		<TextView
+            android:id="@+id/tvLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Đã có tài khoản? Đăng nhập"
+            android:textColor="#0d70b2"
+            android:textSize="20sp"
+            android:visibility="gone" />
+
 	</LinearLayout>
 
 

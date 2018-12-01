@@ -92,6 +92,29 @@ namespace FileSharingApp.Models
 			return result;
 		}
 
+		public string SignUp(string userName, string password)
+		{
+			string result = null;
+			try
+			{
+				Connect();
+
+				var header = string.Join(",", Method.SignUp, userName, password);
+				_writer.WriteLine(header);
+
+				result = _reader.ReadLine();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+			}
+			finally
+			{
+				Disconnect();
+			}
+			return result;
+		}
+
 		public string Login(string userName, string password)
 		{
 			string result = null;
