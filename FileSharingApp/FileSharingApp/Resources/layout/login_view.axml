@@ -13,7 +13,7 @@
 	<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="75dp"
+        android:layout_marginTop="25dp"
         android:orientation="vertical">
 
 		<ImageView
@@ -32,7 +32,50 @@
                 android:layout_height="32dp"
                 android:layout_gravity="center"
                 android:layout_marginLeft="20dp"
-                android:src="@drawable/server" />
+                android:src="@drawable/user_name" />
+
+			<EditText
+                android:id="@+id/edtUserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:hint="user name" />
+		</LinearLayout>
+
+		<LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
+
+			<ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/password" />
+
+			<EditText
+                android:id="@+id/edtPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:hint="password" />
+		</LinearLayout>
+
+		<LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
+
+			<ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="20dp"
+                android:src="@drawable/server"
+                android:tint="#000" />
 
 			<EditText
                 android:id="@+id/edtHostIp"
@@ -53,7 +96,8 @@
                 android:layout_height="32dp"
                 android:layout_gravity="center"
                 android:layout_marginLeft="20dp"
-                android:src="@drawable/port" />
+                android:src="@drawable/port"
+                android:tint="#000" />
 
 			<EditText
                 android:id="@+id/edtPort"
@@ -61,7 +105,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
-                android:hint="port"/>
+                android:hint="port" />
 		</LinearLayout>
 
 		<Button

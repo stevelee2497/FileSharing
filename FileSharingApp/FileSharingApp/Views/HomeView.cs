@@ -18,9 +18,10 @@ using System.IO;
 
 namespace FileSharingApp.Views
 {
-	[Activity(Label = "@string/app_name", Theme = "@style/AppTheme")]
+	[Activity(Theme = "@style/AppTheme")]
 	public class HomeView : AppCompatActivity
 	{
+		private string _userName;
 		private string _ip;
 		private int _portNumber;
 		private List<string> _files;
@@ -35,23 +36,23 @@ namespace FileSharingApp.Views
 			base.OnCreate(savedInstanceState);
 			SetContentView(Resource.Layout.activity_main);
 
-			_ip = Intent.GetStringExtra(LoginView.HostIp);
-			_portNumber = Intent.GetIntExtra(LoginView.PortNumber, 8080);
+			_userName = Intent.GetStringExtra(AppConstants.UserName);
+			_ip = Intent.GetStringExtra(AppConstants.HostIp);
+			_portNumber = Intent.GetIntExtra(AppConstants.PortNumber, 8080);
 			_client = new FileSharingClient(_ip, _portNumber);
-
 			CrossCurrentActivity.Current.Init(this, savedInstanceState);
 			CrossMedia.Current.Initialize();
 
-			_files = _client.GetFileNames("quoc");
 			_rvFiles = FindViewById<RecyclerView>(Resource.Id.recyclerView);
-			_fileAdapter = new FileAdapter(_files, _ip, _portNumber);
+			_uploadFileBtn = FindViewById<ImageView>(Resource.Id.btnUpload);
+			_takePhotoBtn = FindViewById<ImageView>(Resource.Id.btnTakePhoto);
+
+			_files = _client.GetFileNames(_userName);
+			_fileAdapter = new FileAdapter(_files, _ip, _portNumber, _userName);
 			_rvFiles.SetLayoutManager(new GridLayoutManager(this, 4));
 			_rvFiles.SetAdapter(_fileAdapter);
 
-			_uploadFileBtn = FindViewById<ImageView>(Resource.Id.btnUpload);
 			_uploadFileBtn.Click += UploadFileBtn;
-
-			_takePhotoBtn = FindViewById<ImageView>(Resource.Id.btnTakePhoto);
 			_takePhotoBtn.Click += TakePhoto;
 		}
 
@@ -81,7 +82,7 @@ namespace FileSharingApp.Views
 				return;
 			}
 
-			_client.PostFile("quoc", new FileSharingData
+			_client.PostFile(_userName, new FileSharingData
 			{
 				FileName = string.Join(".", DateTimeOffset.Now.ToString("dd-MM-yyyy-HH-mm-tt"), "jpg"),
 				FilePath = file.Path,
@@ -100,7 +101,7 @@ namespace FileSharingApp.Views
 				return;
 			}
 
-			_client.PostFile("quoc", new FileSharingData
+			_client.PostFile(_userName, new FileSharingData
 			{
 				FileName = file.FileName,
 				FileData = file.DataArray
@@ -111,8 +112,8 @@ namespace FileSharingApp.Views
 
 		private void UpdateListView()
 		{
-			_files = _client.GetFileNames("quoc");
-			_fileAdapter = new FileAdapter(_files, _ip, _portNumber);
+			_files = _client.GetFileNames(_userName);
+			_fileAdapter = new FileAdapter(_files, _ip, _portNumber, _userName);
 			_rvFiles.SetAdapter(_fileAdapter);
 		}
 	}
@@ -120,14 +121,16 @@ namespace FileSharingApp.Views
 	public class FileAdapter : RecyclerView.Adapter
 	{
 		private readonly List<string> _images;
+		private readonly string _userName;
 		private readonly string _ip;
 		private readonly int _portNumber;
 
-		public FileAdapter(List<string> images, string _ip, int _portNumber)
+		public FileAdapter(List<string> images, string ip, int portNumber, string userName)
 		{
 			_images = images;
-			this._ip = _ip;
-			this._portNumber = _portNumber;
+			_ip = ip;
+			_portNumber = portNumber;
+			_userName = userName;
 		}
 
 		public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
@@ -142,6 +145,7 @@ namespace FileSharingApp.Views
 			holder.HostIp = _ip;
 			holder.PortNumber = _portNumber;
 			holder.ImageName = _images[position];
+			holder.UserName = _userName;
 		}
 
 		public override int ItemCount => _images.Count;
@@ -149,6 +153,7 @@ namespace FileSharingApp.Views
 
 	public class FileViewHolder : RecyclerView.ViewHolder
 	{
+		public string UserName { get; set; }
 		public string HostIp { get; set; }
 		public int PortNumber { get; set; }
 		public string ImageName
@@ -176,9 +181,10 @@ namespace FileSharingApp.Views
 		private void ImageOnClicked(object sender, EventArgs e)
 		{
 			var intent = new Intent(ItemView.Context, typeof(FileDetailView));
-			intent.PutExtra("File Name", TvName.Text);
-			intent.PutExtra(LoginView.HostIp, HostIp);
-			intent.PutExtra(LoginView.PortNumber, PortNumber);
+			intent.PutExtra(AppConstants.FileName, TvName.Text);
+			intent.PutExtra(AppConstants.UserName, UserName);
+			intent.PutExtra(AppConstants.HostIp, HostIp);
+			intent.PutExtra(AppConstants.PortNumber, PortNumber);
 			ItemView.Context.StartActivity(intent);
 		}
 	}

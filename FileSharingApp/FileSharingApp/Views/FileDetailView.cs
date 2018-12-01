@@ -6,41 +6,38 @@ using Android.Widget;
 using FFImageLoading;
 using FFImageLoading.Cross;
 using FileSharingApp.Helpers;
+using FileSharingApp.Models;
 using System;
 using System.IO;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using FileSharingApp.Models;
 
 namespace FileSharingApp.Views
 {
 	[Activity(Label = "FileDetailView", Theme = "@style/AppTheme.Fullscreen")]
 	public class FileDetailView : AppCompatActivity
 	{
-		private const int BufferSize = 1024;
+		private byte[] _imageData;
+		private string _userName;
 		private string _ip;
 		private int _portNumber;
-
-		public static string FileName = "File Name";
-		private MvxCachedImageView _image;
+		private string _fileName;
 		private ImageView _closeBtn;
 		private ImageView _downloadBtn;
-		private string _fileName;
-		byte[] _imageData;
-		private MemoryStream _stream;
 		private FileSharingClient _client;
+		private MvxCachedImageView _image;
 
 		protected override void OnCreate(Bundle savedInstanceState)
 		{
 			base.OnCreate(savedInstanceState);
 			SetContentView(Resource.Layout.file_detail);
 
-			_ip = Intent.GetStringExtra(LoginView.HostIp);
-			_portNumber = Intent.GetIntExtra(LoginView.PortNumber, 8080);
+			_userName = Intent.GetStringExtra(AppConstants.UserName);
+			_ip = Intent.GetStringExtra(AppConstants.HostIp);
+			_portNumber = Intent.GetIntExtra(AppConstants.PortNumber, 8080);
 			_client = new FileSharingClient(_ip, _portNumber);
 
-			_fileName = Intent.GetStringExtra(FileName);
+			_fileName = Intent.GetStringExtra(AppConstants.FileName);
 			_image = FindViewById<MvxCachedImageView>(Resource.Id.imgMain);
 
 			_image.SetImageDrawable(_fileName.HasImageExtension()
@@ -53,63 +50,15 @@ namespace FileSharingApp.Views
 			_downloadBtn = FindViewById<ImageView>(Resource.Id.downloadBtn);
 			_downloadBtn.Click += Download;
 
-			_imageData = _client.GetImage("quoc", _fileName).FileData;
+			_imageData = _client.GetImage(_userName, _fileName).FileData;
 			ImageService.Instance.LoadStream(GetStream).DownSample(500).Into(_image);
 		}
 
-		private void GetImage(string ip, int portNumber, string method)
-		{
-			TcpClient client = null;
-			NetworkStream networkStream = null;
-			StreamReader reader = null;
-			StreamWriter writer = null;
-			try
-			{
-				client = new TcpClient(ip, portNumber);
-				Console.WriteLine("Connected to the Server...\n");
-				networkStream = client.GetStream();
-				writer = new StreamWriter(networkStream) { AutoFlush = true };
-				reader = new StreamReader(networkStream);
-
-				writer.WriteLine(method);
-				writer.WriteLine(_fileName);
-
-				var fileSize = Convert.ToInt64(reader.ReadLine());
-
-				Console.WriteLine(fileSize);
-
-				_imageData = new byte[fileSize];
-
-				var recData = new byte[BufferSize];
-				_stream = new MemoryStream(_imageData);
-
-				int recBytes = 1;
-
-				while (_stream.Position < fileSize && recBytes > 0)
-				{
-					recBytes = reader.BaseStream.Read(recData, 0, recData.Length);
-					_stream.Write(recData, 0, recBytes);
-				}
-				_stream.Close();
-
-				
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.Message);
-			}
-			finally
-			{
-				reader?.Close();
-				writer?.Close();
-				networkStream?.Close();
-				client?.Close();
-			}
-		}
+		
 
 		private Task<Stream> GetStream(CancellationToken arg)
 		{
-			TaskCompletionSource<Stream> tcs = new TaskCompletionSource<Stream>();
+			var tcs = new TaskCompletionSource<Stream>();
 
 			tcs.TrySetResult(new MemoryStream(_imageData));
 
