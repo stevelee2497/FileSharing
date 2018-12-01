@@ -14,20 +14,17 @@ namespace Server
 
 		public static void Main(string[] args)
 		{
-			var listener = new TcpListener(IPAddress.Parse("10.0.143.67"), PortNumber);
+			var listener = new TcpListener(IPAddress.Any, PortNumber);
 			listener.Start();
 
 			Console.WriteLine("Server started on " + listener.LocalEndpoint);
 			Console.WriteLine("Waiting for a connection...");
 
-			//while (true)
-			//{
-			//	var client = new ClientHandler(listener.AcceptSocket());
-			//	Task.Run(() => client.Listen());
-			//}
-
-			Console.WriteLine(Helper.SignUp("admin", "admin"));
-			Console.ReadKey();
+			while (true)
+			{
+				var client = new ClientHandler(listener.AcceptSocket());
+				Task.Run(() => client.Listen());
+			}
 		}
 	}
 

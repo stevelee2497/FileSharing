@@ -9,7 +9,7 @@ using Android.Views;
 
 namespace FileSharingApp.Views
 {
-	[Activity(Label = "@string/app_name", Theme = "@style/AppTheme.Fullscreen", MainLauncher = true)]
+	[Activity(Label = "@string/app_name", Icon = "@mipmap/ic_launcher", Theme = "@style/AppTheme.Fullscreen", MainLauncher = true)]
 	public class LoginView : AppCompatActivity
 	{
 		private string _userName;
