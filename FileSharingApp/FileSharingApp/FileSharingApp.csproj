@@ -61,7 +61,9 @@
     <Compile Include="Models\FileSharingClient.cs" />
     <Compile Include="Models\FileSharingData.cs" />
     <Compile Include="Models\Method.cs" />
+    <Compile Include="Views\FileAdapter.cs" />
     <Compile Include="Views\FileDetailView.cs" />
+    <Compile Include="Views\FileViewHolder.cs" />
     <Compile Include="Views\HomeView.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

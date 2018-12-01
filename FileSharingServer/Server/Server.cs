@@ -28,15 +28,6 @@ namespace Server
 		}
 	}
 
-	public enum HeaderParam
-	{
-		Method,
-		UserName,
-		Password,
-		FileName,
-		FileSize
-	}
-
 	public class ClientHandler
 	{
 		private const string BaseUrl = "e:\\server";
@@ -54,7 +45,7 @@ namespace Server
 			_reader = new StreamReader(_stream);
 			_writer = new StreamWriter(_stream) { AutoFlush = true };
 		}
-
+		
 		public void Listen()
 		{
 			Console.WriteLine("=============================================");
