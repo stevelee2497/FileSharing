@@ -15,9 +15,6 @@ using Plugin.Media.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace FileSharingApp.Views
 {
@@ -27,11 +24,11 @@ namespace FileSharingApp.Views
 		private string _ip;
 		private int _portNumber;
 		private List<string> _files;
-
 		private ImageView _uploadFileBtn;
 		private ImageView _takePhotoBtn;
 		private RecyclerView _rvFiles;
 		private FileAdapter _fileAdapter;
+		private FileSharingClient _client;
 
 		protected override void OnCreate(Bundle savedInstanceState)
 		{
@@ -40,22 +37,22 @@ namespace FileSharingApp.Views
 
 			_ip = Intent.GetStringExtra(LoginView.HostIp);
 			_portNumber = Intent.GetIntExtra(LoginView.PortNumber, 8080);
+			_client = new FileSharingClient(_ip, _portNumber);
 
 			CrossCurrentActivity.Current.Init(this, savedInstanceState);
 			CrossMedia.Current.Initialize();
+
+			_files = _client.GetFileNames("quoc");
+			_rvFiles = FindViewById<RecyclerView>(Resource.Id.recyclerView);
+			_fileAdapter = new FileAdapter(_files, _ip, _portNumber);
+			_rvFiles.SetLayoutManager(new GridLayoutManager(this, 4));
+			_rvFiles.SetAdapter(_fileAdapter);
 
 			_uploadFileBtn = FindViewById<ImageView>(Resource.Id.btnUpload);
 			_uploadFileBtn.Click += UploadFileBtn;
 
 			_takePhotoBtn = FindViewById<ImageView>(Resource.Id.btnTakePhoto);
 			_takePhotoBtn.Click += TakePhoto;
-
-			GetFileNames(_ip, _portNumber, "GET_FILES");
-
-			_rvFiles = FindViewById<RecyclerView>(Resource.Id.recyclerView);
-			_fileAdapter = new FileAdapter(_files, _ip, _portNumber);
-			_rvFiles.SetLayoutManager(new GridLayoutManager(this, 4));
-			_rvFiles.SetAdapter(_fileAdapter);
 		}
 
 		protected override void OnDestroy()
@@ -68,39 +65,6 @@ namespace FileSharingApp.Views
 		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
 		{
 			Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-		}
-
-		private void GetFileNames(string ip, int portNumber, string method)
-		{
-			TcpClient client = null;
-			NetworkStream networkStream = null;
-			StreamReader reader = null;
-			StreamWriter writer = null;
-			try
-			{
-				client = new TcpClient(ip, portNumber);
-				Console.WriteLine("Connected to the Server...\n");
-				networkStream = client.GetStream();
-
-				writer = new StreamWriter(networkStream) { AutoFlush = true };
-
-				writer.WriteLine(method);
-
-				reader = new StreamReader(networkStream);
-				var result = reader.ReadLine();
-				_files = result?.Split(',').ToList();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.Message);
-			}
-			finally
-			{
-				reader?.Close();
-				writer?.Close();
-				networkStream?.Close();
-				client?.Close();
-			}
 		}
 
 		private async void TakePhoto(object sender, EventArgs e)
@@ -117,19 +81,14 @@ namespace FileSharingApp.Views
 				return;
 			}
 
-			var fileSharingData = new FileSharingData()
+			_client.PostFile("quoc", new FileSharingData
 			{
-				FileName = string.Join(".", DateTimeOffset.Now.ToString("dd-MM-yyyy-HH-mm-tt"),"jpg"),
+				FileName = string.Join(".", DateTimeOffset.Now.ToString("dd-MM-yyyy-HH-mm-tt"), "jpg"),
 				FilePath = file.Path,
 				FileData = File.ReadAllBytes(file.Path)
-			};
+			});
 
-			await PostFile(_ip, _portNumber, "POST_FILE", fileSharingData);
-
-
-			GetFileNames(_ip, _portNumber, "GET_FILES");
-			_fileAdapter = new FileAdapter(_files, _ip, _portNumber);
-			_rvFiles.SetAdapter(_fileAdapter);
+			UpdateListView();
 		}
 
 		private async void UploadFileBtn(object sender, EventArgs e)
@@ -141,53 +100,21 @@ namespace FileSharingApp.Views
 				return;
 			}
 
-			await PostFile(_ip, _portNumber, "POST_FILE", new FileSharingData
+			_client.PostFile("quoc", new FileSharingData
 			{
 				FileName = file.FileName,
 				FileData = file.DataArray
 			});
 
-			GetFileNames(_ip, _portNumber, "GET_FILES");
+			UpdateListView();
+		}
+
+		private void UpdateListView()
+		{
+			_files = _client.GetFileNames("quoc");
 			_fileAdapter = new FileAdapter(_files, _ip, _portNumber);
 			_rvFiles.SetAdapter(_fileAdapter);
 		}
-
-		private Task PostFile(string ip, int portNumber, string method, FileSharingData file) => Task.Run(async () =>  
-		{
-			TcpClient client = null;
-			NetworkStream networkStream = null;
-			StreamReader reader = null;
-			StreamWriter writer = null;
-			try
-			{
-				client = new TcpClient(ip, portNumber);
-				Console.WriteLine("Connected to the Server...\n");
-				networkStream = client.GetStream();
-				reader = new StreamReader(networkStream);
-				writer = new StreamWriter(networkStream) { AutoFlush = true };
-
-				writer.WriteLine(method);
-				writer.WriteLine(file.FileName);
-				writer.WriteLine(file.FileData.Length);
-
-				await Task.Delay(50);
-				writer.BaseStream.Write(file.FileData, 0, file.FileData.Length);
-				writer.BaseStream.Flush();
-
-				var result = reader.ReadLine();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.Message);
-			}
-			finally
-			{
-				reader?.Close();
-				writer?.Close();
-				networkStream?.Close();
-				client?.Close();
-			}
-		});
 	}
 
 	public class FileAdapter : RecyclerView.Adapter

@@ -57,7 +57,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\CommonHelpers.cs" />
+    <Compile Include="Models\FileSharingClient.cs" />
     <Compile Include="Models\FileSharingData.cs" />
+    <Compile Include="Models\Method.cs" />
     <Compile Include="Views\FileDetailView.cs" />
     <Compile Include="Views\HomeView.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />

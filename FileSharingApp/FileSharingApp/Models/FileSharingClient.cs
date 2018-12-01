@@ -1,46 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Net.Mime;
+using System.Linq;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
-using FileSharingClient.Models;
+using Java.Lang;
+using Exception = System.Exception;
 
-namespace FileSharingClient
+namespace FileSharingApp.Models
 {
-	public class Client
-	{
-		public static string SendingFilePath = "C:\\Users\\Tranq\\Desktop\\IMG_3863.JPG";
-
-		private const int BufferSize = 1024;
-		private const string BaseUrl = "e:\\client";
-
-		public static void Main(string[] args)
-		{
-			var ip = "10.0.143.67";
-			var portNumber = 8080;
-
-			while (true)
-			{
-				var result = new FileSharingClient(ip, portNumber).Login("quoc", "123");
-
-				Console.WriteLine(result);
-
-				Console.WriteLine("press any key to exit ...");
-				Console.ReadKey();
-			}
-		}
-	}
-
-	public static class Method
-	{
-		public const string Login = "LOGIN";
-		public const string PostFile = "POST_FILE";
-		public const string GetFileNames = "GET_FILES";
-		public const string GetFile = "GET_FILE";
-		public const string DeleteFile = "DELETE_FILE";
-	}
-
 	public class FileSharingClient
 	{
 		private const int BufferSize = 1024;
@@ -86,7 +53,7 @@ namespace FileSharingClient
 
 				Thread.Sleep(50);
 
-				_writer.BaseStream.Write(file.FileData);
+				_writer.BaseStream.Write(file.FileData, 0, file.FileData.Length);
 				_writer.BaseStream.Flush();
 
 				result = _reader.ReadLine();
@@ -102,9 +69,9 @@ namespace FileSharingClient
 			return result;
 		}
 
-		public string GetFileNames(string userName)
+		public List<string> GetFileNames(string userName)
 		{
-			string result = null;
+			List<string> result = null;
 			try
 			{
 				Connect();
@@ -112,7 +79,7 @@ namespace FileSharingClient
 				var header = string.Join(",", Method.GetFileNames, userName);
 				_writer.WriteLine(header);
 
-				result = _reader.ReadLine();
+				result = _reader.ReadLine()?.Split(',').ToList();
 			}
 			catch (Exception ex)
 			{

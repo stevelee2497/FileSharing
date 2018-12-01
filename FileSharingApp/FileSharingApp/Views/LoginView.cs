@@ -6,6 +6,7 @@ using Android.Content;
 using Android.OS;
 using Android.Support.V7.App;
 using Android.Widget;
+using FileSharingApp.Models;
 
 namespace FileSharingApp.Views
 {
@@ -39,24 +40,21 @@ namespace FileSharingApp.Views
 			_hostIp = string.IsNullOrEmpty(_edtHostIp.Text) ? "10.0.143.67" : _edtHostIp.Text;
 			_port = string.IsNullOrEmpty(_edtPort.Text) ? 8080 : Convert.ToInt32(_edtPort.Text);
 
-			TcpClient client = null;
-			try
+			var result = new FileSharingClient(_hostIp, _port).Login("quoc", "123");
+
+			if ("success".Equals(result))
 			{
-				client = new TcpClient(_hostIp, _port);
-				Console.WriteLine("Connected to the Server...\n");
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.Message);
-			}
-			finally
-			{
-				client?.Close();
 				var intent = new Intent(this, typeof(HomeView));
 				intent.PutExtra(HostIp, _hostIp);
 				intent.PutExtra(PortNumber, _port);
 				StartActivity(intent);
 			}
+		}
+
+		protected override void OnDestroy()
+		{
+			_connectBtn.Click -= ConnectToServer;
+			base.OnDestroy();
 		}
 	}
 }

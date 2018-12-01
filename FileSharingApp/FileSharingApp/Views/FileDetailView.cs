@@ -11,6 +11,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using FileSharingApp.Models;
 
 namespace FileSharingApp.Views
 {
@@ -28,6 +29,7 @@ namespace FileSharingApp.Views
 		private string _fileName;
 		byte[] _imageData;
 		private MemoryStream _stream;
+		private FileSharingClient _client;
 
 		protected override void OnCreate(Bundle savedInstanceState)
 		{
@@ -36,6 +38,8 @@ namespace FileSharingApp.Views
 
 			_ip = Intent.GetStringExtra(LoginView.HostIp);
 			_portNumber = Intent.GetIntExtra(LoginView.PortNumber, 8080);
+			_client = new FileSharingClient(_ip, _portNumber);
+
 			_fileName = Intent.GetStringExtra(FileName);
 			_image = FindViewById<MvxCachedImageView>(Resource.Id.imgMain);
 
@@ -49,7 +53,8 @@ namespace FileSharingApp.Views
 			_downloadBtn = FindViewById<ImageView>(Resource.Id.downloadBtn);
 			_downloadBtn.Click += Download;
 
-			GetImage(_ip, _portNumber, "GET_IMAGE");
+			_imageData = _client.GetImage("quoc", _fileName).FileData;
+			ImageService.Instance.LoadStream(GetStream).DownSample(500).Into(_image);
 		}
 
 		private void GetImage(string ip, int portNumber, string method)
@@ -87,7 +92,7 @@ namespace FileSharingApp.Views
 				}
 				_stream.Close();
 
-				ImageService.Instance.LoadStream(GetStream).DownSample(500).Into(_image);
+				
 			}
 			catch (Exception ex)
 			{
