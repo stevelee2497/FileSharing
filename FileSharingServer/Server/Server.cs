@@ -20,11 +20,14 @@ namespace Server
 			Console.WriteLine("Server started on " + listener.LocalEndpoint);
 			Console.WriteLine("Waiting for a connection...");
 
-			while (true)
-			{
-				var client = new ClientHandler(listener.AcceptSocket());
-				Task.Run(() => client.Listen());
-			}
+			//while (true)
+			//{
+			//	var client = new ClientHandler(listener.AcceptSocket());
+			//	Task.Run(() => client.Listen());
+			//}
+
+			Console.WriteLine(Helper.SignUp("admin", "admin"));
+			Console.ReadKey();
 		}
 	}
 
@@ -102,7 +105,7 @@ namespace Server
 
 		private void SignUn(string userName, string password)
 		{
-			_writer.WriteLine(Helper.Login(userName, password) ? "success" : "error");
+			_writer.WriteLine(Helper.SignUp(userName, password) ? "success" : "error");
 		}
 
 		private void Login(string userName, string password)
