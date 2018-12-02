@@ -25,13 +25,16 @@ namespace Server.Helpers
 				if (userName.Equals(xlRange.Cells[i, 1].Value2.ToString()))
 				{
 					result = false;
+					break;
 				}
 			}
 
-			xlWorksheet.Cells[rowCount + 1, 1] = userName;
-			xlWorksheet.Cells[rowCount + 1, 2] = password;
-
-			xlWorkbook.Save();
+			if (result)
+			{
+				xlWorksheet.Cells[rowCount + 1, 1] = userName;
+				xlWorksheet.Cells[rowCount + 1, 2] = password;
+				xlWorkbook.Save();
+			}
 
 			GC.Collect();
 			GC.WaitForPendingFinalizers();
@@ -61,6 +64,7 @@ namespace Server.Helpers
 				if (userName.Equals(xlRange.Cells[i, 1].Value2.ToString()) && password.Equals(xlRange.Cells[i, 2].Value2.ToString()))
 				{
 					result = true;
+					break;
 				}
 			}
 
