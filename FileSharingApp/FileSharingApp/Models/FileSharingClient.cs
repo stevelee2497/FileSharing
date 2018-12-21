@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Java.Lang;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using Java.Lang;
 using Exception = System.Exception;
 
 namespace FileSharingApp.Models
@@ -78,8 +78,11 @@ namespace FileSharingApp.Models
 
 				var header = string.Join(",", Method.GetFileNames, userName);
 				_writer.WriteLine(header);
-
-				result = _reader.ReadLine()?.Split(',').ToList();
+				var fileNames = _reader.ReadLine();
+				if (!string.IsNullOrEmpty(fileNames))
+				{
+					result = fileNames.Split(',').ToList();
+				}
 			}
 			catch (Exception ex)
 			{
