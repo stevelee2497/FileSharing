@@ -14,7 +14,7 @@ namespace Server
 
 		public static void Main(string[] args)
 		{
-			var listener = new TcpListener(IPAddress.Parse("192.168.43.248"), PortNumber);
+			var listener = new TcpListener(IPAddress.Parse("0.0.0.0"), PortNumber);
 			listener.Start();
 
 			Console.WriteLine("Server started on " + listener.LocalEndpoint);
@@ -102,7 +102,15 @@ namespace Server
 
 		private void SignUn(string userName, string password)
 		{
-			_writer.WriteLine(Helper.SignUp(userName, password) ? "success" : "error");
+			if (Helper.SignUp(userName, password))
+			{
+				_writer.WriteLine("success");
+				Directory.CreateDirectory(Path.Combine(BaseUrl, userName));
+			}
+			else
+			{
+				_writer.WriteLine("error");
+			}
 		}
 
 		private void Login(string userName, string password)
