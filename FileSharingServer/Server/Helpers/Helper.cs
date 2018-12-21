@@ -15,7 +15,7 @@ namespace Server.Helpers
 		{
 			var result = true;
 			var xlApp = new Microsoft.Office.Interop.Excel.Application();
-			var xlWorkbook = xlApp.Workbooks.Open(@"E:\server\data.xlsx");
+			var xlWorkbook = xlApp.Workbooks.Open(@"D:\server\data.xlsx");
 			var xlWorksheet = xlWorkbook.Sheets[1];
 
 			var xlRange = xlWorksheet.UsedRange;
@@ -53,7 +53,7 @@ namespace Server.Helpers
 			var result = false;
 
 			var xlApp = new Microsoft.Office.Interop.Excel.Application();
-			var xlWorkbook = xlApp.Workbooks.Open(@"E:\server\data.xlsx");
+			var xlWorkbook = xlApp.Workbooks.Open(@"D:\server\data.xlsx");
 			Microsoft.Office.Interop.Excel._Worksheet xlWorksheet = xlWorkbook.Sheets[1];
 			var xlRange = xlWorksheet.UsedRange;
 

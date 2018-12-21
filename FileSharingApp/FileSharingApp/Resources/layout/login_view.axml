@@ -55,15 +55,15 @@
                 android:layout_gravity="center"
                 android:layout_marginLeft="20dp"
                 android:src="@drawable/password" />
-
 			<EditText
-                android:id="@+id/edtPassword"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:textSize="16sp"
-                android:hint="password" />
+				android:id="@+id/edtPassword"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginLeft="20dp"
+				android:layout_marginRight="20dp"
+				android:textSize="16sp"
+				android:hint="password"
+				android:inputType="textPassword" />
 		</LinearLayout>
 
 		<LinearLayout
@@ -87,7 +87,8 @@
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
                 android:textSize="16sp"
-                android:hint="retype password" />
+                android:hint="retype password" 
+				android:inputType="textPassword" />
 		</LinearLayout>
 
 		<LinearLayout
