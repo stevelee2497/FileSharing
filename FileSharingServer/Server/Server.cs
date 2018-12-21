@@ -30,7 +30,7 @@ namespace Server
 
 	public class ClientHandler
 	{
-		private const string BaseUrl = "d:\\server";
+		private const string BaseUrl = "c:\\server";
 		private const int BufferSize = 1024;
 
 		private readonly Socket _socket;
